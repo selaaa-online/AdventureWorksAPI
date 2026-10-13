@@ -1,0 +1,79 @@
+﻿namespace AdventureWorks.Common.Constants;
+
+public static class ConfigurationConstants
+{
+    /// <summary>
+    /// AKV URL from injected Environment Variables -OR- User Secrets
+    /// </summary>
+    public const string KeyVaultUrl = "KeyVault:VaultUri";
+
+    /// <summary>
+    /// The AKV initial retry delay, defaults to 100 ms
+    /// </summary>
+    public const string KeyVaultRetryDelay = "KeyVault:RetryDelayMilliseconds";
+
+    /// <summary>
+    /// The maximum amount of time that will be spent retrying connecting to AKV, default to 3000ms
+    /// </summary>
+    public const string KeyVaultMaxRetryDelay = "KeyVault:MaxRetryDelayMilliseconds";
+
+    /// <summary>
+    /// The maximum number of retry attempts to connect to AKV, default to 5
+    /// </summary>
+    public const string KeyVaultMaxRetryAttempts = "KeyVault:MaxRetryAttempts";
+
+    /// <summary>
+    /// AppInsightsInstrumentationKey3 value name
+    /// </summary>
+    public const string AppInsightsConnectionString = "ApplicationInsights:ConnectionString";
+
+    /// <summary>
+    /// ASPNetCore Environment1 value name
+    /// </summary>
+    public const string ApplicationEnvironment01 = "ASPNETCORE_ENVIRONMENT";
+
+    /// <summary>
+    /// ASPNetCore Environment2 value name
+    /// </summary>
+    public const string ApplicationEnvironment02 = "APPSETTING_ASPNETCORE_ENVIRONMENT";
+
+    /// <summary>
+    /// The configuration key used for setting the default Sql connection string
+    /// </summary>
+    public const string CurrentConnectionStringNameKey = "CurrentConnectionStringName";
+
+    /// <summary>
+    /// The configuration key used for selecting which Azure AD configuration section binds JWT authentication
+    /// </summary>
+    public const string AzureAdCurrentSectionNameKey = "AzureAdSettings:CurrentSectionName";
+
+    /// <summary>
+    /// Default Azure AD configuration section name
+    /// </summary>
+    public const string AzureAdDefaultSectionName = "AzureAd";
+
+    /// <summary>
+    /// Playwright E2E Azure AD configuration section name (dedicated test tenant)
+    /// </summary>
+    public const string AzureAdPlaywrightTestingSectionName = "AzureAdPlaywrightTesting";
+
+    /// <summary>
+    /// k6 load testing Azure AD configuration section name (dedicated test tenant)
+    /// </summary>
+    public const string AzureAdLoadTestingSectionName = "AzureAdLoadTesting";
+
+    /// <summary>
+    /// AutoMapper license key value name
+    /// </summary>
+    public const string AutoMapperLicenseKey = "AutoMapperLicenseKey";
+
+    /// <summary>
+    /// MediatR license key value name
+    /// </summary>
+    public const string MediatRLicenseKey = "MediatRLicenseKey";
+
+    /// <summary>
+    /// The HTTP header name for correlation ID tracking across distributed systems
+    /// </summary>
+    public const string CorrelationIdHeaderName = "X-Correlation-ID";
+}

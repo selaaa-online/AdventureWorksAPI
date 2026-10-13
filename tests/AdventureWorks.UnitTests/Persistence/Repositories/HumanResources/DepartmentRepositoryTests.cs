@@ -1,0 +1,101 @@
+using AdventureWorks.Application.PersistenceContracts.Repositories.HumanResources;
+using AdventureWorks.Common.Attributes;
+using AdventureWorks.Domain.Entities.HumanResources;
+using AdventureWorks.Infrastructure.Persistence.Repositories.HumanResources;
+
+namespace AdventureWorks.UnitTests.Persistence.Repositories.HumanResources;
+
+[ExcludeFromCodeCoverage]
+public sealed class DepartmentRepositoryTests : PersistenceUnitTestBase
+{
+    private readonly DepartmentRepository _sut;
+
+    public DepartmentRepositoryTests()
+    {
+        _sut = new DepartmentRepository(DbContext);
+
+        DbContext.Departments.AddRange(new List<DepartmentEntity>
+        {
+            new() { DepartmentId = 1, Name = "Engineering", GroupName = "Research and Development", ModifiedDate = DateTime.UtcNow }
+            ,new() { DepartmentId = 2, Name = "Tool Design", GroupName = "Research and Development", ModifiedDate = DateTime.UtcNow }
+            ,new() { DepartmentId = 3, Name = "Sales", GroupName = "Sales and Marketing", ModifiedDate = DateTime.UtcNow }
+        });
+
+        DbContext.SaveChanges();
+    }
+
+    [Fact]
+    public void Type_has_correct_structure()
+    {
+        using (new AssertionScope())
+        {
+            typeof(DepartmentRepository)
+                .Should().Implement<IDepartmentRepository>();
+
+            typeof(DepartmentRepository)
+                .IsDefined(typeof(ServiceLifetimeScopedAttribute), false)
+                .Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public async Task ListAllAsync_is_correctAsync()
+    {
+        var result = await _sut.ListAllAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        using (new AssertionScope())
+        {
+            result.Count.Should().Be(3);
+            result.Count(x => x.DepartmentId == 3 && x.Name == "Sales").Should().Be(1);
+        }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public async Task GetByIdAsync_is_correctAsync(int id)
+    {
+        var result = await _sut.GetByIdAsync(id, cancellationToken: TestContext.Current.CancellationToken);
+
+        using (new AssertionScope())
+        {
+            result.Should().NotBeNull();
+            result!.DepartmentId.Should().Be((short)id);
+        }
+    }
+
+    [Fact]
+    public async Task ExistsByNameAsync_returns_true_when_name_existsAsync()
+    {
+        var result = await _sut.ExistsByNameAsync("Engineering", cancellationToken: TestContext.Current.CancellationToken);
+
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ExistsByNameAsync_returns_false_when_name_does_not_existAsync()
+    {
+        var result = await _sut.ExistsByNameAsync("NonExistentDepartment", cancellationToken: TestContext.Current.CancellationToken);
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExistsByNameExcludingIdAsync_returns_false_when_name_belongs_to_excluded_idAsync()
+    {
+        // "Engineering" is department ID 1; excluding ID 1 should return false
+        var result = await _sut.ExistsByNameExcludingIdAsync("Engineering", excludeId: 1, cancellationToken: TestContext.Current.CancellationToken);
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExistsByNameExcludingIdAsync_returns_true_when_name_belongs_to_different_departmentAsync()
+    {
+        // "Engineering" belongs to ID 1; excluding ID 2 means ID 1 still matches
+        var result = await _sut.ExistsByNameExcludingIdAsync("Engineering", excludeId: 2, cancellationToken: TestContext.Current.CancellationToken);
+
+        result.Should().BeTrue();
+    }
+}

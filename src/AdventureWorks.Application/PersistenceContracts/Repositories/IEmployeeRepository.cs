@@ -1,0 +1,189 @@
+using AdventureWorks.Common.Filtering;
+using AdventureWorks.Domain.Entities.HumanResources;
+using AdventureWorks.Domain.Entities.Person;
+using AdventureWorks.Models.Features.HumanResources;
+
+namespace AdventureWorks.Application.PersistenceContracts.Repositories;
+
+/// <summary>
+/// Repository contract for Employee entity operations.
+/// </summary>
+public interface IEmployeeRepository : IAsyncRepository<EmployeeEntity>
+{
+    /// <summary>
+    /// Creates a new employee with full entity graph: BusinessEntity → Person → Employee.
+    /// Leverages EF Core navigation properties for cascade inserts.
+    /// All operations are performed within a single transaction.
+    /// </summary>
+    /// <param name="employeeEntity">Employee entity with navigation properties populated</param>
+    /// <param name="personEntity">Person entity to be created</param>
+    /// <param name="personPhone">Optional phone number entity</param>
+    /// <param name="emailAddress">Optional email address entity</param>
+    /// <param name="address">Optional address entity</param>
+    /// <param name="addressTypeId">Address type ID (required if address provided)</param>
+    /// <param name="modifiedDate">System modification timestamp</param>
+    /// <param name="rowGuid">System-generated unique identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>BusinessEntityId of the created employee</returns>
+    Task<int> CreateEmployeeWithPersonAsync(
+        EmployeeEntity employeeEntity,
+        PersonEntity personEntity,
+        PersonPhone personPhone,
+        EmailAddressEntity emailAddress,
+        AddressEntity address,
+        int addressTypeId,
+        DateTime modifiedDate,
+        Guid rowGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves an employee by their BusinessEntityId with Person data.
+    /// </summary>
+    /// <param name="businessEntityId">The unique business entity identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Employee entity or null if not found</returns>
+    Task<EmployeeEntity?> GetEmployeeByIdAsync(int businessEntityId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of employees and the total count of employees in the database.
+    /// </summary>
+    /// <param name="parameters">The input paging parameters</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Tuple containing the list of employees and total count</returns>
+    Task<(IReadOnlyList<EmployeeEntity>, int)> GetEmployeesAsync(EmployeeParameter parameters, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paged list of employees filtered using the search criteria.
+    /// </summary>
+    /// <param name="parameters">The input paging parameters</param>
+    /// <param name="employeeSearchModel">The employee search criteria</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Tuple containing the filtered list of employees and total count</returns>
+    Task<(IReadOnlyList<EmployeeEntity>, int)> SearchEmployeesAsync(
+        EmployeeParameter parameters,
+        EmployeeSearchModel employeeSearchModel,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves all addresses for a specific employee.
+    /// </summary>
+    /// <param name="businessEntityId">The employee's business entity identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of BusinessEntityAddress entities with Address and AddressType included</returns>
+    Task<IReadOnlyList<BusinessEntityAddressEntity>> GetEmployeeAddressesAsync(int businessEntityId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a specific address for an employee.
+    /// </summary>
+    /// <param name="businessEntityId">The employee's business entity identifier</param>
+    /// <param name="addressId">The address identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>BusinessEntityAddress entity with Address and AddressType included, or null if not found</returns>
+    Task<BusinessEntityAddressEntity?> GetEmployeeAddressByIdAsync(int businessEntityId, int addressId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves an employee by their BusinessEntityId with EmployeeDepartmentHistory collection.
+    /// Includes related Department and Shift entities for each history record.
+    /// Used by lifecycle commands that need to manage department assignments.
+    /// </summary>
+    /// <param name="businessEntityId">The unique business entity identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Employee entity with department history, or null if not found</returns>
+    Task<EmployeeEntity?> GetEmployeeByIdWithDepartmentHistoryAsync(int businessEntityId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves an employee by their BusinessEntityId with full lifecycle data.
+    /// Includes Person, EmployeeDepartmentHistory (with Department and Shift), and EmployeePayHistory.
+    /// Used by lifecycle status query to aggregate comprehensive employee information.
+    /// </summary>
+    /// <param name="businessEntityId">The unique business entity identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Employee entity with full lifecycle data, or null if not found</returns>
+    Task<EmployeeEntity?> GetEmployeeByIdWithLifecycleDataAsync(int businessEntityId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves all department history records for an employee, ordered by StartDate descending.
+    /// Includes related Department and Shift entities.
+    /// </summary>
+    /// <param name="businessEntityId">The employee's business entity identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A read-only list of EmployeeDepartmentHistory ordered by StartDate descending.</returns>
+    Task<IReadOnlyList<EmployeeDepartmentHistory>> GetEmployeeDepartmentHistoryAsync(
+        int businessEntityId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Transfers an employee to a new department and/or shift within a single transaction.
+    /// Closes the current active department assignment and inserts a new open one.
+    /// Throws <see cref="ConflictException"/> if a record for the same key already exists on the transfer date.
+    /// </summary>
+    /// <param name="businessEntityId">The employee's business entity identifier.</param>
+    /// <param name="newDepartmentId">The target department ID.</param>
+    /// <param name="newShiftId">The target shift ID.</param>
+    /// <param name="transferDate">Date used as EndDate on the closed record and StartDate on the new record.</param>
+    /// <param name="modifiedDate">Audit timestamp.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task TransferEmployeeDepartmentAsync(
+        int businessEntityId,
+        short newDepartmentId,
+        byte newShiftId,
+        DateTime transferDate,
+        DateTime modifiedDate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves all pay history records for an employee, ordered by RateChangeDate descending.
+    /// </summary>
+    /// <param name="businessEntityId">The employee's business entity identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A read-only list of EmployeePayHistory ordered by RateChangeDate descending.</returns>
+    Task<IReadOnlyList<EmployeePayHistory>> GetEmployeePayHistoryAsync(
+        int businessEntityId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Inserts a new pay history record and saves changes.
+    /// </summary>
+    /// <param name="record">The pay history record to insert.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task RecordPayChangeAsync(
+        EmployeePayHistory record,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns a flat list of all active employees with org hierarchy data.
+    /// ParentEmployeeId is null for the root (CEO) node.
+    /// Executed via raw SQL to access the hierarchyid column not mapped to the entity.
+    /// </summary>
+    Task<IReadOnlyList<EmployeeOrgTreeItemModel>> GetOrgTreeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns all active employees with their current department assignment and full pay history.
+    /// Used for computing HR dashboard aggregate statistics in memory.
+    /// </summary>
+    Task<IReadOnlyList<EmployeeEntity>> GetActiveEmployeesWithPayHistoryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the total employee count and the active employee count (<c>CurrentFlag == true</c>) in a single
+    /// pass, without loading navigation properties. Used for HR dashboard stat cards where only counts are needed.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Tuple of (TotalCount, ActiveCount).</returns>
+    Task<(int TotalCount, int ActiveCount)> GetEmployeeCountsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns true if an employee with the given National ID Number already exists.
+    /// Backs the CreateEmployeeValidator uniqueness rule (Rule-31).
+    /// </summary>
+    /// <param name="nationalIdNumber">The National ID Number to check.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<bool> NationalIdNumberExistsAsync(string nationalIdNumber, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns true if an employee with the given Login ID already exists.
+    /// Backs the CreateEmployeeValidator uniqueness rule (Rule-32).
+    /// </summary>
+    /// <param name="loginId">The Login ID to check.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<bool> LoginIdExistsAsync(string loginId, CancellationToken cancellationToken = default);
+}

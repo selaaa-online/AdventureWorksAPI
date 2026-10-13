@@ -1,0 +1,320 @@
+﻿using System.Data;
+using AdventureWorks.Application.PersistenceContracts.Repositories.Sales;
+using AdventureWorks.Common.Attributes;
+using AdventureWorks.Common.Constants;
+using AdventureWorks.Common.Filtering;
+using AdventureWorks.Common.Helpers;
+using AdventureWorks.Domain.Entities.Sales;
+using AdventureWorks.Infrastructure.Persistence.DbContexts;
+using Microsoft.EntityFrameworkCore;
+
+namespace AdventureWorks.Infrastructure.Persistence.Repositories.Sales;
+
+[ServiceLifetimeScoped]
+public sealed class StoreRepository(AdventureWorksDbContext dbContext)
+    : EfRepository<StoreEntity>(dbContext), IStoreRepository
+{
+
+    /// <summary>
+    /// Retrieve a store by id along with its related entities
+    /// </summary>
+    /// <param name="storeId">the unique store identifier</param>
+    /// <param name="includeAddresses">when false, address navigation properties are not loaded</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    public async Task<StoreEntity?> GetStoreByIdAsync(int storeId, bool includeAddresses = true, CancellationToken cancellationToken = default)
+    {
+        return await BuildBaseStoreQuery(includeAddresses)
+            .FirstOrDefaultAsync(x => x.BusinessEntityId == storeId, cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves a paginated list of stores and the total count of stores in the database.
+    /// </summary>
+    /// <param name="parameters">the input paging parameters</param>
+    /// <param name="includeAddresses">when false, address navigation properties are not loaded</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    public async Task<(IReadOnlyList<StoreEntity>, int)> GetStoresAsync(StoreParameter parameters, bool includeAddresses = true, CancellationToken cancellationToken = default)
+    {
+        var totalCount = await DbContext.Stores.CountAsync(cancellationToken);
+
+        var storeQuery = BuildBaseStoreQuery(includeAddresses);
+
+        switch (parameters.OrderBy)
+        {
+            case SortedResultConstants.BusinessEntityId:
+                storeQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    storeQuery.OrderBy(x => x.BusinessEntityId) :
+                    storeQuery.OrderByDescending(x => x.BusinessEntityId);
+                break;
+            case SortedResultConstants.Name:
+                storeQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    storeQuery.OrderBy(x => x.Name) :
+                    storeQuery.OrderByDescending(x => x.Name);
+                break;
+        }
+
+        storeQuery = storeQuery.Skip(parameters.GetRecordsToSkip()).Take(parameters.PageSize);
+
+        var results = await storeQuery.ToListAsync(cancellationToken);
+
+        return (results.AsReadOnly(), totalCount);
+    }
+
+    /// <summary>
+    /// Retrieves a paged list of stores that is filtered using the <paramref name="storeSearchModel"/> input parameter.
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="storeSearchModel"></param>
+    /// <param name="includeAddresses">when false, address navigation properties are not loaded</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    public async Task<(IReadOnlyList<StoreEntity>, int)> SearchStoresAsync(
+        StoreParameter parameters,
+        StoreSearchModel storeSearchModel,
+        bool includeAddresses = true,
+        CancellationToken cancellationToken = default)
+    {
+        var storeQuery = BuildBaseStoreQuery(includeAddresses);
+
+        if (storeSearchModel != null)
+        {
+            if (storeSearchModel.Id != null)
+            {
+                storeQuery = storeQuery.Where(y => y.BusinessEntityId == storeSearchModel.Id);
+            }
+
+            if (!string.IsNullOrWhiteSpace(storeSearchModel.Name))
+            {
+                storeQuery = storeQuery.Where(y => EF.Functions.Like(y.Name, $"%{LikePatternHelper.EscapeLikePattern(storeSearchModel.Name.Trim())}%"));
+            }
+        }
+
+        storeQuery = parameters.OrderBy switch
+        {
+            SortedResultConstants.BusinessEntityId => parameters.SortOrder == SortedResultConstants.Ascending
+                ? storeQuery.OrderBy(x => x.BusinessEntityId)
+                : storeQuery.OrderByDescending(x => x.BusinessEntityId),
+            SortedResultConstants.Name => parameters.SortOrder == SortedResultConstants.Ascending
+                ? storeQuery.OrderBy(x => x.Name)
+                : storeQuery.OrderByDescending(x => x.Name),
+            _ => storeQuery
+        };
+
+        var totalCount = await storeQuery.CountAsync(cancellationToken);
+
+        storeQuery = storeQuery.Skip(parameters.GetRecordsToSkip()).Take(parameters.PageSize);
+
+        var results = await storeQuery.ToListAsync(cancellationToken);
+
+        return (results.AsReadOnly(), totalCount);
+    }
+
+    /// <summary>
+    /// Builds the base store query with SalesPerson includes and optionally address includes.
+    /// </summary>
+    /// <param name="includeAddresses">when false, address navigation properties are not loaded</param>
+    private IQueryable<StoreEntity> BuildBaseStoreQuery(bool includeAddresses = true)
+    {
+        var query = DbContext.Stores
+            .AsNoTracking()
+            .Include(x => x.PrimarySalesPerson)
+                .ThenInclude(y => y.Employee)
+                .ThenInclude(z => z.PersonBusinessEntity)
+                .ThenInclude(e => e.EmailAddresses)
+            .AsQueryable();
+
+        if (includeAddresses)
+        {
+            query = query
+                .Include(x => x.StoreBusinessEntity)
+                    .ThenInclude(y => y.BusinessEntityAddresses)
+                    .ThenInclude(y => y.AddressType)
+                .Include(x => x.StoreBusinessEntity)
+                    .ThenInclude(y => y.BusinessEntityAddresses)
+                    .ThenInclude(z => z.Address)
+                    .ThenInclude(ab => ab.StateProvince)
+                    .ThenInclude(abc => abc.CountryRegion);
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Returns true if a store with the given id exists.
+    /// </summary>
+    public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Stores.AnyAsync(x => x.BusinessEntityId == id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves a narrow projection (BusinessEntityId, Name, Demographics XML) for the given store
+    /// without loading navigation properties. Returns <c>null</c> when the store does not exist.
+    /// </summary>
+    public async Task<StoreDemographicsProjection?> GetDemographicsAsync(int storeId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Stores
+            .AsNoTracking()
+            .Where(x => x.BusinessEntityId == storeId)
+            .Select(x => new StoreDemographicsProjection
+            {
+                BusinessEntityId = x.BusinessEntityId,
+                Name = x.Name,
+                Demographics = x.Demographics
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Retrieves a narrow performance aggregate for the given store and calendar year.
+    /// Returns <c>null</c> when the store does not exist; otherwise returns a populated
+    /// projection (zero values when the store has no customers/orders).
+    /// </summary>
+    public async Task<StorePerformanceProjection?> GetPerformanceAsync(int storeId, int year, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Stores
+            .AsNoTracking()
+            .Where(s => s.BusinessEntityId == storeId)
+            .Select(s => new StorePerformanceProjection
+            {
+                BusinessEntityId = s.BusinessEntityId,
+                Name = s.Name,
+                Year = year,
+                RevenueYtd = s.Customers.SelectMany(c => c.SalesOrderHeaders)
+                    .Where(o => o.OrderDate.Year == year)
+                    .Sum(o => (decimal?)o.TotalDue) ?? 0m,
+                OrderCount = s.Customers.SelectMany(c => c.SalesOrderHeaders)
+                    .Count(o => o.OrderDate.Year == year),
+                CustomerCount = s.Customers.Count()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Atomically closes the open StoreSalesPersonHistory row (or creates a synthetic outgoing record
+    /// when none exists and the store currently has a salesperson), inserts a new open history row,
+    /// and updates Store.SalesPersonId / ModifiedDate. The repository owns the EF transaction.
+    /// </summary>
+    public async Task ReassignSalesPersonAsync(int storeId, int newSalesPersonId, DateTime assignedDate, CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await DbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        try
+        {
+            var store = await DbContext.Stores
+                .FirstOrDefaultAsync(x => x.BusinessEntityId == storeId, cancellationToken)
+                ?? throw new KeyNotFoundException($"Store with ID {storeId} was not found.");
+
+            // Authoritative same-person guard inside the transaction (prevents TOCTOU with handler pre-check)
+            if (store.SalesPersonId == newSalesPersonId)
+                throw new InvalidOperationException(SalesConstants.SameSalesPersonSentinel);
+
+            var historySet = DbContext.Set<StoreSalesPersonHistoryEntity>();
+
+            var openRecord = await historySet
+                .FirstOrDefaultAsync(x => x.BusinessEntityId == storeId && x.EndDate == null, cancellationToken);
+
+            if (openRecord is not null)
+            {
+                openRecord.EndDate = assignedDate;
+                openRecord.ModifiedDate = assignedDate;
+            }
+            else if (store.SalesPersonId.HasValue)
+            {
+                // Only create the synthetic outgoing record if the referenced salesperson still exists;
+                // guards against FK violation when the outgoing SP was deleted after the store was assigned.
+                var outgoingSpExists = await DbContext.Set<SalesPersonEntity>()
+                    .AnyAsync(sp => sp.BusinessEntityId == store.SalesPersonId.Value, cancellationToken);
+
+                if (outgoingSpExists)
+                {
+                    historySet.Add(new StoreSalesPersonHistoryEntity
+                    {
+                        BusinessEntityId = storeId,
+                        SalesPersonId = store.SalesPersonId.Value,
+                        StartDate = store.ModifiedDate,
+                        EndDate = assignedDate,
+                        ModifiedDate = assignedDate,
+                        Rowguid = Guid.NewGuid()
+                    });
+                }
+            }
+
+            historySet.Add(new StoreSalesPersonHistoryEntity
+            {
+                BusinessEntityId = storeId,
+                SalesPersonId = newSalesPersonId,
+                StartDate = assignedDate,
+                EndDate = null,
+                ModifiedDate = assignedDate,
+                Rowguid = Guid.NewGuid()
+            });
+
+            store.SalesPersonId = newSalesPersonId;
+            store.ModifiedDate = assignedDate;
+
+            await DbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Retrieves a paged list of customer projections for the given store. The caller is responsible
+    /// for verifying store existence (this method returns (empty, 0) for stores with no customers,
+    /// which is indistinguishable from a non-existent store at this layer).
+    /// </summary>
+    public async Task<(IReadOnlyList<StoreCustomerProjection>, int)> GetCustomersByStoreIdAsync(
+        int storeId, StoreCustomerParameter parameters, CancellationToken cancellationToken = default)
+    {
+        var totalCount = await DbContext.Set<CustomerEntity>()
+            .Where(c => c.StoreId == storeId)
+            .CountAsync(cancellationToken);
+
+        var customerQuery = DbContext.Set<CustomerEntity>()
+            .AsNoTracking()
+            .Where(c => c.StoreId == storeId)
+            .Select(c => new StoreCustomerProjection
+            {
+                CustomerId = c.CustomerId,
+                AccountNumber = c.AccountNumber ?? string.Empty,
+                PersonName = c.Person == null ? string.Empty : (c.Person.FirstName + " " + c.Person.LastName),
+                LifetimeSpend = c.SalesOrderHeaders.Sum(o => (decimal?)o.TotalDue) ?? 0m,
+                OrderCount = c.SalesOrderHeaders.Count(),
+                LastOrderDate = c.SalesOrderHeaders.Max(o => (DateTime?)o.OrderDate)
+            });
+
+        switch (parameters.OrderBy)
+        {
+            case StoreCustomerParameter.LifetimeSpend:
+                customerQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    customerQuery.OrderBy(x => x.LifetimeSpend) :
+                    customerQuery.OrderByDescending(x => x.LifetimeSpend);
+                break;
+            case StoreCustomerParameter.PersonName:
+                customerQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    customerQuery.OrderBy(x => x.PersonName) :
+                    customerQuery.OrderByDescending(x => x.PersonName);
+                break;
+            case StoreCustomerParameter.OrderCount:
+                customerQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    customerQuery.OrderBy(x => x.OrderCount) :
+                    customerQuery.OrderByDescending(x => x.OrderCount);
+                break;
+            case StoreCustomerParameter.LastOrderDate:
+                customerQuery = parameters.SortOrder == SortedResultConstants.Ascending ?
+                    customerQuery.OrderBy(x => x.LastOrderDate) :
+                    customerQuery.OrderByDescending(x => x.LastOrderDate);
+                break;
+        }
+
+        customerQuery = customerQuery.Skip(parameters.GetRecordsToSkip()).Take(parameters.PageSize);
+
+        var results = await customerQuery.ToListAsync(cancellationToken);
+
+        return (results.AsReadOnly(), totalCount);
+    }
+}
+

@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+
+	<!-- Packaging for the local NuGet feed consumed by apps/functions-dotnet. Version must be
+	     overridden via -p:Version=<unique-value> on every `dotnet pack` (see
+	     apps/functions-dotnet/pack-local-nuget.sh) — a static version would let restore silently
+	     keep serving a stale cached .nupkg after this project changes. -->
+	<PropertyGroup>
+		<PackageId>AdventureWorks.Domain</PackageId>
+		<Version>1.0.0-dev</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Exceptions\**" />
+		<Compile Remove="ViewModels\**" />
+		<EmbeddedResource Remove="Exceptions\**" />
+		<EmbeddedResource Remove="ViewModels\**" />
+		<None Remove="Exceptions\**" />
+		<None Remove="ViewModels\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.9" />
+
+	</ItemGroup>
+
+</Project>

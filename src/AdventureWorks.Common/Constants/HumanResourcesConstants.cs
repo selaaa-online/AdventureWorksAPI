@@ -1,0 +1,86 @@
+namespace AdventureWorks.Common.Constants;
+
+/// <summary>
+/// Constants for Human Resources domain business rules and defaults.
+/// </summary>
+public static class HumanResourcesConstants
+{
+    /// <summary>
+    /// Default vacation hours granted to new hires.
+    /// </summary>
+    public const short DefaultVacationHours = 40;
+
+    /// <summary>
+    /// Default sick leave hours granted to new hires.
+    /// </summary>
+    public const short DefaultSickLeaveHours = 24;
+
+    /// <summary>
+    /// Minimum number of days that must pass between termination and rehire eligibility.
+    /// </summary>
+    public const int MinimumDaysBeforeRehire = 90;
+
+    /// <summary>
+    /// Maximum vacation hours that can be granted (business rule limit).
+    /// </summary>
+    public const short MaximumVacationHours = 240;
+
+    /// <summary>
+    /// Maximum sick leave hours that can be granted (business rule limit).
+    /// </summary>
+    public const short MaximumSickLeaveHours = 480;
+
+    /// <summary>
+    /// Maximum pay rate allowed (hourly or annual depending on SalariedFlag).
+    /// </summary>
+    public const decimal MaximumPayRate = 500.00m;
+
+    /// <summary>
+    /// Minimum pay rate allowed when recording a pay history entry, matching the CK_EmployeePayHistory_Rate DB constraint.
+    /// </summary>
+    public const decimal PayHistoryMinimumRate = 6.50m;
+
+    /// <summary>
+    /// Maximum pay rate allowed when recording a pay history entry, matching the CK_EmployeePayHistory_Rate DB constraint.
+    /// </summary>
+    public const decimal PayHistoryMaximumRate = 200.00m;
+
+    /// <summary>
+    /// Maximum days in the future a hire date can be scheduled.
+    /// </summary>
+    public const int MaximumFutureHireDays = 30;
+
+    /// <summary>
+    /// Maximum days in the future a termination date can be scheduled.
+    /// </summary>
+    public const int MaximumFutureTerminationDays = 90;
+
+    /// <summary>
+    /// Minimum shift ID (1 = Day shift).
+    /// </summary>
+    public const byte MinimumShiftId = 1;
+
+    /// <summary>
+    /// Maximum shift ID (3 = Night shift).
+    /// </summary>
+    public const byte MaximumShiftId = 3;
+
+    /// <summary>
+    /// Monthly pay frequency code.
+    /// </summary>
+    public const byte PayFrequencyMonthly = 1;
+
+    /// <summary>
+    /// Bi-weekly pay frequency code.
+    /// </summary>
+    public const byte PayFrequencyBiWeekly = 2;
+
+    /// <summary>
+    /// Temporary hire date placeholder for newly created employees.
+    /// Employees must go through the hire lifecycle workflow to set their actual hire date.
+    /// Set to 1996-07-01 — the exact lower bound of the DB's CK_Employee_HireDate CHECK constraint
+    /// (HireDate >= '1996-07-01') — so this sentinel value satisfies the constraint on every insert.
+    /// A more obviously-fake value (e.g. 1901-01-01) would violate the constraint and fail every insert.
+    /// </summary>
+    public static readonly DateTime TemporaryHireDate = new DateTime(1996, 7, 1);
+}

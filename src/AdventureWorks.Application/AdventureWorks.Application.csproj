@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+
+	<!-- Packaging for the local NuGet feed consumed by apps/functions-dotnet. Version must be
+	     overridden via -p:Version=<unique-value> on every `dotnet pack` (see
+	     apps/functions-dotnet/pack-local-nuget.sh) — a static version would let restore silently
+	     keep serving a stale cached .nupkg after this project changes. -->
+	<PropertyGroup>
+		<PackageId>AdventureWorks.Application</PackageId>
+		<Version>1.0.0-dev</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Features\HumanResources\Contracts\**" />
+	  <Compile Remove="Features\HumanResources\Services\**" />
+	  <EmbeddedResource Remove="Features\HumanResources\Contracts\**" />
+	  <EmbeddedResource Remove="Features\HumanResources\Services\**" />
+	  <None Remove="Features\HumanResources\Contracts\**" />
+	  <None Remove="Features\HumanResources\Services\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.2.0" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="MediatR" Version="14.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.9" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.19.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="AsyncFixer" Version="2.1.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<Using Include="BCrypt.Net.BCrypt" Alias="BC" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AdventureWorks.Common\AdventureWorks.Common.csproj" />
+		<ProjectReference Include="..\AdventureWorks.Domain\AdventureWorks.Domain.csproj" />
+		<ProjectReference Include="..\AdventureWorks.Models\AdventureWorks.Models.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,1106 @@
+{
+  "info": {
+    "_postman_id": "c40dfe85-92ad-498e-bdb4-75818ebe758c",
+    "name": "Person",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "2569631"
+  },
+  "item": [
+    {
+      "name": "Address Type",
+      "item": [
+        {
+          "name": "Address Type List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/addressTypes",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "addressTypes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Address Type by Id - Billing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const id = 1\r",
+                  "const name = \"Billing\"\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Should return correct response object\", function() {   \r",
+                  "    pm.expect(response.id).to.eql(id);\r",
+                  "    pm.expect(response.name).to.eql(name);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/addressTypes/1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "addressTypes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Address Type by Id - Home",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const id = 2;\r",
+                  "const name = \"Home\"\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Should return correct response object\", function() {   \r",
+                  "    pm.expect(response.id).to.eql(id);\r",
+                  "    pm.expect(response.name).to.eql(name);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/addressTypes/2",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "addressTypes",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Address Type by Id - Invalid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.text();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.response.to.have.body(\"A valid address type id must be specified.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/addressTypes/-1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "addressTypes",
+                "-1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Address Type by Id - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be not found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.text();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.response.to.have.body(\"Unable to locate the address type.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/addressTypes/2147483647",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "addressTypes",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contact Type",
+      "item": [
+        {
+          "name": "Contact Type List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/contactTypes",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "contactTypes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Contact Type - Sales Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const id = 19\r",
+                  "const name = \"Sales Manager\"\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Should return correct response object\", function() {   \r",
+                  "    pm.expect(response.id).to.eql(id);\r",
+                  "    pm.expect(response.name).to.eql(name);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/contactTypes/19",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "contactTypes",
+                "19"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Country Region",
+      "item": [
+        {
+          "name": "Country List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/countries",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "countries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Country by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/countries/JP",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "countries",
+                "JP"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Country by Id - Not Found Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/countries/UNITEDSTATES",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "countries",
+                "UNITEDSTATES"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Country by Id - Invalid",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/countries/12345",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "countries",
+                "12345"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Person Type",
+      "item": [
+        {
+          "name": "Person Type List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/personTypes",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "personTypes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person Type - Individual Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const id = 2\r",
+                  "const name = \"Individual Customer\"\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Should return correct response object\", function() {   \r",
+                  "    pm.expect(response.id).to.eql(id);\r",
+                  "    pm.expect(response.name).to.eql(name);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/personTypes/2",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "personTypes",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Phone Type",
+      "item": [
+        {
+          "name": "List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/phoneNumberTypes",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "phoneNumberTypes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "By Id - Cell",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const id = 1\r",
+                  "const name = \"Cell\"\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Should return correct response object\", function() {   \r",
+                  "    pm.expect(response.id).to.eql(id);\r",
+                  "    pm.expect(response.name).to.eql(name);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/phoneNumberTypes/1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "phoneNumberTypes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "By Id - Invalid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.text();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.response.to.have.body(\"A valid phone number type id must be specified.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/phoneNumberTypes/-1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "phoneNumberTypes",
+                "-1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "By Id - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be not found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.text();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.response.to.have.body(\"Unable to locate the phone number type.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/phoneNumberTypes/2147483647",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "phoneNumberTypes",
+                "2147483647"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Person Directory",
+      "item": [
+        {
+          "name": "Person by Id - Ken Sanchez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Has X-Correlation-Id header\", function () {\r",
+                  "    pm.response.to.have.header(\"X-Correlation-Id\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Body should be a person detail\", function () {\r",
+                  "    pm.expect(response.businessEntityId).to.eql(1);\r",
+                  "    pm.expect(response.firstName).to.eql(\"Ken\");\r",
+                  "    pm.expect(response.lastName).to.eql(\"Sánchez\");\r",
+                  "    pm.expect(response.emailAddresses).to.be.an(\"array\");\r",
+                  "    pm.expect(response.phoneNumbers).to.be.an(\"array\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons/1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person by Id - Invalid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be bad request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.expect(response).to.eql(\"A valid person id must be specified.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons/-1",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons",
+                "-1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person by Id - Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be not found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Body should be correct\", function () {\r",
+                  "  pm.expect(response).to.eql(\"Unable to locate the person.\");\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons/999999",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person List - Search by First Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Has X-Correlation-Id header\", function () {\r",
+                  "    pm.response.to.have.header(\"X-Correlation-Id\");\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Body should be a paginated person list\", function () {\r",
+                  "    var pageNumber = response.pageNumber ?? response.PageNumber;\r",
+                  "    var pageSize = response.pageSize ?? response.PageSize;\r",
+                  "    var totalCount = response.totalCount ?? response.TotalCount;\r",
+                  "\r",
+                  "    pm.expect(response.items).to.be.an(\"array\");\r",
+                  "    pm.expect(pageNumber).to.eql(1);\r",
+                  "    pm.expect(pageSize).to.eql(10);\r",
+                  "    pm.expect(totalCount).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"All items contain matching firstName\", function () {\r",
+                  "    response.items.forEach(function(p) {\r",
+                  "        pm.expect(p.firstName.toLowerCase()).to.include(\"ken\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons?firstName=Ken&page=1&pageSize=10",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons"
+              ],
+              "query": [
+                { "key": "firstName", "value": "Ken" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person List - Search by Person Type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"All items are Employees\", function () {\r",
+                  "    response.items.forEach(function(p) {\r",
+                  "        var personTypeName = p.personTypeName ?? p.PersonTypeName;\r",
+                  "        pm.expect(personTypeName).to.be.a(\"string\");\r",
+                  "        pm.expect(personTypeName.toLowerCase()).to.include(\"employee\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons?personTypeCode=EM&page=1&pageSize=10",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons"
+              ],
+              "query": [
+                { "key": "personTypeCode", "value": "EM" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person List - Search by First Name and Person Type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "var response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Items match all filters\", function () {\r",
+                  "    response.items.forEach(function(p) {\r",
+                  "        var personTypeName = p.personTypeName ?? p.PersonTypeName;\r",
+                  "        pm.expect(p.firstName.toLowerCase()).to.include(\"ken\");\r",
+                  "        pm.expect(personTypeName).to.be.a(\"string\");\r",
+                  "        pm.expect(personTypeName.toLowerCase()).to.include(\"employee\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons?firstName=Ken&personTypeCode=EM&page=1&pageSize=10",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons"
+              ],
+              "query": [
+                { "key": "firstName", "value": "Ken" },
+                { "key": "personTypeCode", "value": "EM" },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Person List - No Filter (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status should be 400 Bad Request\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/persons?page=1&pageSize=10",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "persons"
+              ],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "State Province",
+      "item": [
+        {
+          "name": "State List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/states",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "states"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "State by Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/states/10",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "states",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "State by Id #2",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adventureWorksApi}}/{{apiVersion}}/states/5",
+              "host": [
+                "{{adventureWorksApi}}"
+              ],
+              "path": [
+                "{{apiVersion}}",
+                "states",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "accessTokenUrl",
+        "value": "https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/token",
+        "type": "string"
+      },
+      {
+        "key": "authUrl",
+        "value": "https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/authorize",
+        "type": "string"
+      },
+      {
+        "key": "scope",
+        "value": "{{scope}}",
+        "type": "string"
+      },
+      {
+        "key": "clientSecret",
+        "value": "{{clientSecret}}",
+        "type": "string"
+      },
+      {
+        "key": "clientId",
+        "value": "{{clientId}}",
+        "type": "string"
+      },
+      {
+        "key": "redirect_uri",
+        "value": "{{callbackUrl}}",
+        "type": "string"
+      },
+      {
+        "key": "client_authentication",
+        "value": "header",
+        "type": "string"
+      },
+      {
+        "key": "tokenName",
+        "value": "AdventureWorks",
+        "type": "string"
+      },
+      {
+        "key": "useBrowser",
+        "value": false,
+        "type": "boolean"
+      },
+      {
+        "key": "grant_type",
+        "value": "authorization_code",
+        "type": "string"
+      },
+      {
+        "key": "refreshRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "tokenRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "authRequestParams",
+        "value": [],
+        "type": "any"
+      },
+      {
+        "key": "challengeAlgorithm",
+        "value": "S256",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          "var moment = require('moment');\r",
+          "pm.collectionVariables.set('currentDateTime', moment().format( (\"YYYYMMDD_hhmmss\")));\r",
+          "pm.collectionVariables.set('currentDate', moment().format( (\"YYYY-MM-DD\")));\r",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "currentDateTime",
+      "value": ""
+    },
+    {
+      "key": "currentDate",
+      "value": ""
+    },
+    {
+      "key": "randomString",
+      "value": ""
+    },
+    {
+      "key": "lastCreatedEmployeeId",
+      "value": ""
+    },
+    {
+      "key": "updateEmployeeId",
+      "value": ""
+    },
+    {
+      "key": "lifecycleEmployeeId",
+      "value": ""
+    }
+  ]
+}

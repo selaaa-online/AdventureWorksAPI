@@ -1,0 +1,83 @@
+﻿using AdventureWorks.Common.Filtering;
+using AdventureWorks.Domain.Entities.HumanResources;
+using AdventureWorks.Domain.Entities.Person;
+using AdventureWorks.Domain.Entities.Sales;
+
+namespace AdventureWorks.Application.PersistenceContracts.Repositories.Sales;
+
+public interface ISalesPersonRepository : IAsyncRepository<SalesPersonEntity>
+{
+    /// <summary>
+    /// Creates a new sales person with full entity graph.
+    /// Creates: BusinessEntity → Person → Employee → SalesPerson + Phone + Email + Address.
+    /// All operations are performed within a single transaction.
+    /// </summary>
+    Task<int> CreateSalesPersonWithEmployeeAsync(
+        SalesPersonEntity salesPersonEntity,
+        EmployeeEntity employeeEntity,
+        PersonEntity personEntity,
+        PersonPhone personPhone,
+        EmailAddressEntity emailAddress,
+        AddressEntity address,
+        int addressTypeId,
+        DateTime modifiedDate,
+        Guid rowGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing sales person with cascade updates to related entities.
+    /// Updates: Person → Employee → SalesPerson.
+    /// All operations are performed within a single transaction.
+    /// </summary>
+    Task UpdateSalesPersonWithEmployeeAsync(
+        SalesPersonEntity salesPersonEntity,
+        EmployeeEntity employeeEntity,
+        PersonEntity personEntity,
+        DateTime modifiedDate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieve a sales person by id along with their related entities
+    /// </summary>
+    /// <param name="salesPersonId">the unique sales person identifier</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    /// <returns></returns>
+    Task<SalesPersonEntity?> GetSalesPersonByIdAsync(int salesPersonId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of sales persons and the total count of sales persons in the database.
+    /// </summary>
+    /// <param name="parameters">the input paging parameters</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    Task<(IReadOnlyList<SalesPersonEntity>, int)> GetSalesPersonsAsync(SalesPersonParameter parameters, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paged list of sales persons that is filtered using the <paramref name="salesPersonSearchModel"/> input parameter.
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="salesPersonSearchModel"></param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    /// <returns></returns>
+    Task<(IReadOnlyList<SalesPersonEntity>, int)> SearchSalesPersonsAsync(SalesPersonParameter parameters, SalesPersonSearchModel salesPersonSearchModel, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns true if a sales person with the given id exists.
+    /// </summary>
+    /// <param name="id">the sales person business entity id</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a sales person with quota history and territory history navigation properties loaded.
+    /// </summary>
+    /// <param name="salesPersonId">the unique sales person identifier</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    Task<SalesPersonEntity?> GetSalesPersonWithPerformanceDataAsync(int salesPersonId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns the total order count and summed revenue for a sales person across all sales orders.
+    /// </summary>
+    /// <param name="salesPersonId">the unique sales person identifier</param>
+    /// <param name="cancellationToken">token to cancel the operation</param>
+    Task<(int OrderCount, decimal TotalRevenue)> GetSalesPersonOrderAggregatesAsync(int salesPersonId, CancellationToken cancellationToken = default);
+}

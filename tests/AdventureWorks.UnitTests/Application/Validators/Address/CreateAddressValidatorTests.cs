@@ -1,0 +1,126 @@
+﻿using AdventureWorks.Application.Features.AddressManagement.Validators;
+using AdventureWorks.Application.PersistenceContracts.Repositories;
+using AdventureWorks.Domain.Entities.Person;
+using AdventureWorks.Models.Features.AddressManagement;
+using AdventureWorks.Models.Slim;
+using AdventureWorks.Test.Common.Utilities;
+using FluentValidation.TestHelper;
+
+namespace AdventureWorks.UnitTests.Application.Validators.Address;
+
+[ExcludeFromCodeCoverage]
+public sealed class CreateAddressValidatorTests : UnitTestBase
+{
+    private readonly Mock<IStateProvinceRepository> _mockStateProvinceRepository = new();
+    private readonly CreateAddressValidator _sut;
+
+    public CreateAddressValidatorTests()
+    {
+        _sut = new CreateAddressValidator(_mockStateProvinceRepository.Object);
+    }
+
+    [Fact]
+    public void Validator_error_messages_are_correct()
+    {
+        CreateAddressValidator.MessageAddressLine1Empty.Should().Be("Address Line 1 cannot be null, empty, or whitespace");
+        CreateAddressValidator.MessageAddressLine1Length.Should().Be("Address Line 1 cannot be greater than 60 characters");
+        CreateAddressValidator.MessageAddressLine2Length.Should().Be("Address Line 2 cannot be greater than 60 characters");
+        CreateAddressValidator.MessageCityEmpty.Should().Be("City cannot be null, empty, or whitespace");
+        CreateAddressValidator.MessageCityLength.Should().Be("City cannot be greater than 30 characters");
+        CreateAddressValidator.PostalCodeEmpty.Should().Be("Postal Code cannot be null, empty, or whitespace");
+        CreateAddressValidator.PostalCodeLength.Should().Be("Postal Code cannot be greater than 15 characters");
+        CreateAddressValidator.StateProvinceIdExists.Should().Be("StateProvince Id must exist prior to use");
+        CreateAddressValidator.StateProvinceExists.Should().Be("StateProvince is required");
+    }
+
+    [Fact]
+    public async Task Validator_succeeds_when_all_data_is_validAsync()
+    {
+        const int stateId = 7;
+
+        _mockStateProvinceRepository.Setup(x => x.GetByIdAsync(stateId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StateProvinceEntity { StateProvinceId = stateId, Name = "Colorado" });
+
+        var validAddress = new AddressCreateModel
+        {
+            AddressLine1 = StringGenerator.GetRandomString(60),
+            AddressLine2 = StringGenerator.GetRandomString(60),
+            City = StringGenerator.GetRandomString(30),
+            StateProvince = new GenericSlimModel { Id = stateId, Name = string.Empty, Code = string.Empty },
+            PostalCode = StringGenerator.GetRandomString(15)
+        };
+
+        var validationResult = await _sut.TestValidateAsync(validAddress, cancellationToken: TestContext.Current.CancellationToken);
+
+        using (new AssertionScope())
+        {
+            validationResult.ShouldNotHaveAnyValidationErrors();
+            validationResult.IsValid.Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public async Task Validator_when_address_is_invalidAsync()
+    {
+        _mockStateProvinceRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))!
+            .ReturnsAsync((StateProvinceEntity)null!);
+
+        using (new AssertionScope())
+        {
+            var validationResult = await _sut.TestValidateAsync(new AddressCreateModel(), cancellationToken: TestContext.Current.CancellationToken);
+
+            validationResult.ShouldHaveValidationErrorFor(a => a.AddressLine1)
+                .WithErrorCode("Rule-01");
+
+            validationResult = await _sut.TestValidateAsync(
+                    new AddressCreateModel
+                    {
+                        AddressLine1 = string.Empty
+                    }, cancellationToken: TestContext.Current.CancellationToken)
+                ;
+
+            validationResult.ShouldHaveValidationErrorFor(a => a.AddressLine1)
+                .WithErrorCode("Rule-01");
+
+            validationResult = await _sut.TestValidateAsync(
+                    new AddressCreateModel
+                    {
+                        AddressLine1 = StringGenerator.GetRandomString(61)
+                    }, cancellationToken: TestContext.Current.CancellationToken)
+                ;
+
+            validationResult.ShouldHaveValidationErrorFor(a => a.AddressLine1)
+                .WithErrorCode("Rule-02");
+
+            validationResult.ShouldHaveValidationErrorFor(a => a.StateProvince)
+                .WithErrorCode("Rule-08");
+        }
+    }
+
+
+    [Fact]
+    public async Task Validator_when_address_state_does_not_exists_is_invalidAsync()
+    {
+        _mockStateProvinceRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))!
+            .ReturnsAsync((StateProvinceEntity)null!);
+
+        using (new AssertionScope())
+        {
+            var validationResult = await _sut.TestValidateAsync(new AddressCreateModel
+                {
+                StateProvince = new GenericSlimModel
+                {
+                    Id = 1548,
+                    Code = "ABCDEFG",
+                    Name = string.Empty
+                }
+            }, cancellationToken: TestContext.Current.CancellationToken)
+                ;
+
+            validationResult.ShouldHaveValidationErrorFor(a => a.StateProvince)
+                .WithErrorCode("Rule-07");
+        }
+    }
+}
